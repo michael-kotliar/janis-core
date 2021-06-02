@@ -34,7 +34,6 @@ class WdlParser:
     def from_doc(doc: str, base_uri=None):
         abs_path = os.path.relpath(doc)
         d = WDL.load(abs_path)
-
         parser = WdlParser()
 
         if d.workflow:
@@ -60,6 +59,9 @@ class WdlParser:
 
         for call in obj.body:
             self.add_call_to_wf(wf, call)
+
+        for out in obj.outputs:
+            self.add_decl_to_wf_output(wf, out)
 
         return wf
 
@@ -147,6 +149,9 @@ class WdlParser:
             )
 
         return wf.input(inp.name, self.parse_wdl_type(inp.type), default=default)
+
+    def add_decl_to_wf_output(self, wf: j.WorkflowBase, out: WDL.Decl):
+        return wf.output(out.name, self.parse_wdl_type(out.type), self.workflow_selector_getter(wf, str(out.expr)))
 
     @classmethod
     def container_from_runtime(cls, runtime, inputs: List[WDL.Decl]):
@@ -435,13 +440,11 @@ class WdlParser:
         return j.ToolOutput(outp.name, self.parse_wdl_type(outp.type), selector=sel)
 
 
-if __name__ == "__main__":
-    import sys
-    if len(sys.argv) != 2:
-        raise Exception("Expected 1 argument, the name of a CWL tool.")
-        
-    toolname = sys.argv[1]
-
-    tool = WdlParser.from_doc(toolname)
-
-    tool.translate("janis")
+def translate_from_wdl(wdl_location, translated_location, translation=None):
+    translation = "cwl" if translation is None else translation
+    tool = WdlParser.from_doc(wdl_location)
+    tool.translate(
+        translation=translation,
+        to_disk=True,
+        export_path=translated_location
+    )
