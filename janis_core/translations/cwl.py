@@ -147,7 +147,7 @@ class CwlTranslator(TranslatorBase, metaclass=TranslatorMeta):
 
         metadata = wf.metadata
         w = cwlgen.Workflow(
-            id=wf.id(),
+            # id=wf.id(),
             label=wf.friendly_name(),
             doc=metadata.documentation,
             cwlVersion=CWL_VERSION,
@@ -489,7 +489,7 @@ class CwlTranslator(TranslatorBase, metaclass=TranslatorMeta):
         stderr = STDERR_NAME
 
         tool_cwl = cwlgen.CommandLineTool(
-            id=tool.id(),
+            # id=tool.id(),
             baseCommand=tool.base_command(),
             label=tool.friendly_name() or tool.id(),
             doc=metadata.documentation,
